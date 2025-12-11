@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.schoolmanager.schoolmanager.DTOs.RequestDTOs.StudentRequestDTO;
 import org.schoolmanager.schoolmanager.DTOs.ResponseDTOs.StudentResponseDTO;
+import org.schoolmanager.schoolmanager.Exceptions.AlreadyExistsException;
+import org.schoolmanager.schoolmanager.Exceptions.ResourceNotFoundException;
 import org.schoolmanager.schoolmanager.Mapper.StudentMapper;
 import org.schoolmanager.schoolmanager.Model.Student;
 import org.schoolmanager.schoolmanager.Model.StudentIdSequence;
@@ -13,6 +15,7 @@ import org.schoolmanager.schoolmanager.Service.StudentService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,9 @@ public class StudentServiceImpl implements StudentService {
     public void createStudent(StudentRequestDTO studentRequestDTO) {
         Student newStudent = mapper.toEntity(studentRequestDTO);
 
+        if(repo.existsByEmail(newStudent.getEmail())){
+            throw new AlreadyExistsException("Email is already in use");
+        }
         String studentId = generateStudentId(newStudent.getEntryYear());
         newStudent.setStudentId(studentId);
         repo.save(newStudent);
@@ -40,14 +46,15 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentResponseDTO getStudentById(String studentId) {
         Student student = repo.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                                .orElseThrow(()->new ResourceNotFoundException("Student not found"));
+
         return mapper.toDTO(student);
     }
 
     @Override
     public void deleteStudentById(String studentId) {
         Student student = repo.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         repo.delete(student);
     }
 
@@ -55,7 +62,7 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public void updateStudent(String studentId, StudentRequestDTO studentRequestDTO) {
         Student student = repo.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         mapper.updateStudentFromDTO(studentRequestDTO, student);
 
@@ -69,7 +76,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Transactional
     public String generateStudentId(Integer entryYear) {
-        int yearPart = entryYear % 100; // 2025 → 25
+        int yearPart = entryYear % 1000; // 2025 → 25
 
         StudentIdSequence sequence = sequenceRepo
                 .findById(yearPart)

@@ -35,7 +35,7 @@ public class StudentController {
         return new ResponseEntity<>(service.getStudentById(studentId),HttpStatus.FOUND);
     }
 
-    @DeleteMapping("/students")
+    @DeleteMapping("/students/{studentId}")
     public ResponseEntity<Void> deleteStudentById(@PathVariable("studentId") String studentId){
         service.deleteStudentById(studentId);
         return new  ResponseEntity<>(HttpStatusCode.valueOf(204));
