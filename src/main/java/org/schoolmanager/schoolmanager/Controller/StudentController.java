@@ -1,7 +1,8 @@
 package org.schoolmanager.schoolmanager.Controller;
 
 import lombok.RequiredArgsConstructor;
-import org.schoolmanager.schoolmanager.DTOs.RequestDTOs.StudentRequestDTO;
+import org.schoolmanager.schoolmanager.DTOs.RequestDTOs.StudentCreateDTO;
+import org.schoolmanager.schoolmanager.DTOs.RequestDTOs.StudentUpdateDTO;
 import org.schoolmanager.schoolmanager.DTOs.ResponseDTOs.StudentResponseDTO;
 import org.schoolmanager.schoolmanager.Service.StudentService;
 import org.springframework.http.HttpStatus;
@@ -25,25 +26,25 @@ public class StudentController {
     }
 
     @PostMapping("/students")
-    public ResponseEntity<Void> createStudent(@RequestBody StudentRequestDTO studentRequestDTO){
-        service.createStudent(studentRequestDTO);
+    public ResponseEntity<Void> createStudent(@RequestBody StudentCreateDTO studentCreateDTO){
+        service.createStudent(studentCreateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/students/{studentId}")
     public ResponseEntity<StudentResponseDTO> getStudentById(@PathVariable("studentId") String studentId){
-        return new ResponseEntity<>(service.getStudentById(studentId),HttpStatus.FOUND);
+        return new ResponseEntity<>(service.getStudentById(studentId),HttpStatus.OK);
     }
 
     @DeleteMapping("/students/{studentId}")
     public ResponseEntity<Void> deleteStudentById(@PathVariable("studentId") String studentId){
         service.deleteStudentById(studentId);
-        return new  ResponseEntity<>(HttpStatusCode.valueOf(204));
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/students/{studentId}")
-    public ResponseEntity<Void> updateStudent(@PathVariable("studentId") String studentId, @RequestBody StudentRequestDTO studentRequestDTO){
-        service.updateStudent(studentId, studentRequestDTO);
+    public ResponseEntity<Void> updateStudent(@PathVariable("studentId") String studentId, @RequestBody StudentUpdateDTO studentUpdateDTO){
+        service.updateStudent(studentId, studentUpdateDTO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

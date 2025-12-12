@@ -2,7 +2,8 @@ package org.schoolmanager.schoolmanager.Service.Implementation;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.schoolmanager.schoolmanager.DTOs.RequestDTOs.StudentRequestDTO;
+import org.schoolmanager.schoolmanager.DTOs.RequestDTOs.StudentCreateDTO;
+import org.schoolmanager.schoolmanager.DTOs.RequestDTOs.StudentUpdateDTO;
 import org.schoolmanager.schoolmanager.DTOs.ResponseDTOs.StudentResponseDTO;
 import org.schoolmanager.schoolmanager.Exceptions.AlreadyExistsException;
 import org.schoolmanager.schoolmanager.Exceptions.ResourceNotFoundException;
@@ -15,7 +16,7 @@ import org.schoolmanager.schoolmanager.Service.StudentService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +33,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public void createStudent(StudentRequestDTO studentRequestDTO) {
-        Student newStudent = mapper.toEntity(studentRequestDTO);
+    public void createStudent(StudentCreateDTO studentCreateDTO) {
+        Student newStudent = mapper.toEntity(studentCreateDTO);
 
         if(repo.existsByEmail(newStudent.getEmail())){
             throw new AlreadyExistsException("Email is already in use");
@@ -60,11 +61,11 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional
-    public void updateStudent(String studentId, StudentRequestDTO studentRequestDTO) {
+    public void updateStudent(String studentId, StudentUpdateDTO studentUpdateDTO) {
         Student student = repo.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
-        mapper.updateStudentFromDTO(studentRequestDTO, student);
+        mapper.updateStudentFromDTO(studentUpdateDTO, student);
 
         // Protect fields user should NOT update
         // (just override MapStruct’s changes)
@@ -76,7 +77,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Transactional
     public String generateStudentId(Integer entryYear) {
-        int yearPart = entryYear % 1000; // 2025 → 25
+        int yearPart = entryYear % 100; // 2025 → 25
 
         StudentIdSequence sequence = sequenceRepo
                 .findById(yearPart)
